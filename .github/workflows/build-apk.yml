@@ -38,6 +38,12 @@ jobs:
       - name: Bump minSdkVersion to 23
         run: sed -i 's/flutter.minSdkVersion/23/' android/app/build.gradle
 
+      - name: Bump compileSdk to 36
+        run: sed -i 's/flutter.compileSdkVersion/36/' android/app/build.gradle
+
+      - name: Bump Kotlin plugin version
+        run: sed -i -E 's/(id "org\.jetbrains\.kotlin\.android" version ")[^"]*(")/\11.9.24\2/' android/settings.gradle
+
       - name: Ensure permissions
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
