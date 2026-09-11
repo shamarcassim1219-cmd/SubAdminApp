@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'services/api_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
@@ -13,7 +15,16 @@ class AppColors {
   static const white = Colors.white;
 }
 
-void main() {
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  } catch (_) {}
   runApp(const SubAdminApp());
 }
 
@@ -122,6 +133,16 @@ class _AuthGateState extends State<_AuthGate> {
         _loading = false;
       });
     }
+    if (token != null) {
+      _registerFcmToken();
+    }
+  }
+
+  Future<void> _registerFcmToken() async {
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) await ApiService.saveFcmToken(fcmToken);
+    } catch (_) {}
   }
 
   @override
