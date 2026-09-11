@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/api_service.dart';
+import 'notifications_screen.dart';
 
 class VerificationsScreen extends StatefulWidget {
   const VerificationsScreen({super.key});
@@ -13,11 +14,20 @@ class _VerificationsScreenState extends State<VerificationsScreen> {
   List<dynamic> _items = [];
   bool _loading = true;
   String? _error;
+  int _unreadCount = 0;
 
   @override
   void initState() {
     super.initState();
     _load();
+    _loadUnreadCount();
+  }
+
+  Future<void> _loadUnreadCount() async {
+    try {
+      final count = await ApiService.getUnreadCount();
+      if (mounted) setState(() => _unreadCount = count);
+    } catch (_) {}
   }
 
   Future<void> _load() async {
@@ -110,7 +120,37 @@ class _VerificationsScreenState extends State<VerificationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bg,
-      appBar: AppBar(title: const Text('Verifications')),
+      appBar: AppBar(
+        title: const Text('Verifications'),
+        actions: [
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () async {
+                  await Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
+                  _loadUnreadCount();
+                },
+              ),
+              if (_unreadCount > 0)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
+                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                    child: Text(
+                      _unreadCount > 9 ? '9+' : '$_unreadCount',
+                      style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : _error != null

@@ -107,6 +107,24 @@ class ApiService {
     } catch (_) {}
   }
 
+  // ---------- NOTIFICATIONS ----------
+  static Future<List<dynamic>> getNotifications() async {
+    final res = await http.get(Uri.parse('$baseUrl/notifications'), headers: await _headers());
+    final data = await _handle(res);
+    return data['notifications'];
+  }
+
+  static Future<int> getUnreadCount() async {
+    final res = await http.get(Uri.parse('$baseUrl/notifications/unread-count'), headers: await _headers());
+    final data = await _handle(res);
+    return data['count'] ?? 0;
+  }
+
+  static Future<void> markAllNotificationsRead() async {
+    final res = await http.post(Uri.parse('$baseUrl/notifications/mark-all-read'), headers: await _headers());
+    await _handle(res);
+  }
+
   // ---------- VERIFICATIONS ----------
   static Future<List<dynamic>> getVerifications() async {
     final res = await http.get(Uri.parse('$baseUrl/subadmin/verifications'), headers: await _headers());
