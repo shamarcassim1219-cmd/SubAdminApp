@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'firebase_options.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'services/api_service.dart';
 import 'screens/login_screen.dart';
@@ -35,13 +36,13 @@ Future<void> _setupLocalNotifications() async {
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     await _setupLocalNotifications();
 
