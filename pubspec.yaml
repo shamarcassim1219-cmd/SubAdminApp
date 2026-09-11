@@ -25,6 +25,7 @@ dev_dependencies:
 
 dependency_overrides:
   flutter_plugin_android_lifecycle: 2.0.17
+  geolocator_android: 4.5.4
 
 flutter:
   uses-material-design: true
