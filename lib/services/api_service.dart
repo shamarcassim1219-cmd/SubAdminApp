@@ -121,6 +121,18 @@ class ApiService {
     await _handle(res);
   }
 
+  // ---------- CONTENT REPORTS ----------
+  static Future<List<dynamic>> getContentReports() async {
+    final res = await http.get(Uri.parse('$baseUrl/subadmin/content-reports'), headers: await _headers());
+    final data = await _handle(res);
+    return data['reports'];
+  }
+
+  static Future<void> resolveContentReport(int id) async {
+    final res = await http.post(Uri.parse('$baseUrl/subadmin/content-reports/$id/resolve'), headers: await _headers());
+    await _handle(res);
+  }
+
   // ---------- SETTINGS ----------
   static Future<Map<String, dynamic>> getMe() async {
     final res = await http.get(Uri.parse('$baseUrl/subadmin/me'), headers: await _headers());
