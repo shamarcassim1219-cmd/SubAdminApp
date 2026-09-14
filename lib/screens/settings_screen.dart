@@ -148,7 +148,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
     try {
-      final result = await ApiService.checkForUpdate('1.0.3');
+      final result = await ApiService.checkForUpdate('1.0.4');
       if (!mounted) return;
       Navigator.pop(context);
       if (result['updateAvailable'] == true) {
@@ -164,7 +164,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ElevatedButton(
                   onPressed: () async {
                     final uri = Uri.tryParse(result['downloadUrl']);
-                    if (uri != null && await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    if (uri != null) {
+                      try {
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Could not open download link: ${e.toString()}')),
+                          );
+                        }
+                      }
+                    }
                     if (ctx.mounted) Navigator.pop(ctx);
                   },
                   child: const Text('Download'),

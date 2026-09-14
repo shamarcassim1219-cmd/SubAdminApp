@@ -59,6 +59,11 @@ jobs:
           grep -q "android.permission.ACCESS_COARSE_LOCATION" "$MANIFEST" || sed -i '/<\/manifest>/i\    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" \/>' "$MANIFEST"
           grep -q "android.permission.POST_NOTIFICATIONS" "$MANIFEST" || sed -i '/<\/manifest>/i\    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" \/>' "$MANIFEST"
 
+      - name: Add browser queries for url_launcher
+        run: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          grep -q "<queries>" "$MANIFEST" || sed -i '/<\/manifest>/i\    <queries>\n        <intent>\n            <action android:name="android.intent.action.VIEW" \/>\n            <category android:name="android.intent.category.BROWSABLE" \/>\n            <data android:scheme="https" \/>\n        <\/intent>\n    <\/queries>' "$MANIFEST"
+
       - name: Add FCM default notification icon
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
