@@ -168,6 +168,12 @@ class ApiService {
     return await _handle(res);
   }
 
+  static Future<String> getEarnings() async {
+    final res = await http.get(Uri.parse('$baseUrl/subadmin/earnings'), headers: await _headers());
+    final data = await _handle(res);
+    return data['earning']?.toString() ?? '0.00';
+  }
+
   static Future<List<dynamic>> getActivityLog() async {
     final res = await http.get(Uri.parse('$baseUrl/subadmin/activity-log'), headers: await _headers());
     final data = await _handle(res);

@@ -3,6 +3,7 @@ import '../main.dart';
 import '../services/api_service.dart';
 import 'otp_verify_screen.dart';
 import 'register_screen.dart';
+import 'pending_approval_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,7 +37,17 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     } catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      final lower = msg.toLowerCase();
+      if (lower.contains('pending') || lower.contains('approv')) {
+        if (mounted) {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const PendingApprovalScreen()),
+          );
+        }
+      } else {
+        setState(() => _error = msg);
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

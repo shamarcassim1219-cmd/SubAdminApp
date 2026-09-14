@@ -14,14 +14,11 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   Map<String, dynamic>? _profile;
-  bool _biometricLock = false;
-  bool _notifyVerifications = true;
 
   @override
   void initState() {
     super.initState();
     _loadProfile();
-    _loadPrefs();
   }
 
   Future<void> _loadProfile() async {
@@ -29,26 +26,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final data = await ApiService.getMe();
       if (mounted) setState(() => _profile = data);
     } catch (_) {}
-  }
-
-  Future<void> _loadPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _biometricLock = prefs.getBool('subadmin_biometric_lock') ?? false;
-      _notifyVerifications = prefs.getBool('subadmin_notify_verifications') ?? true;
-    });
-  }
-
-  Future<void> _toggleBiometric(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('subadmin_biometric_lock', value);
-    setState(() => _biometricLock = value);
-  }
-
-  Future<void> _toggleNotify(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('subadmin_notify_verifications', value);
-    setState(() => _notifyVerifications = value);
   }
 
   Future<void> _logout() async {
@@ -171,7 +148,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
     try {
-      final result = await ApiService.checkForUpdate('1.0.0');
+      final result = await ApiService.checkForUpdate('1.0.1');
       if (!mounted) return;
       Navigator.pop(context);
       if (result['updateAvailable'] == true) {
@@ -262,24 +239,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Text('Security', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13)),
           _tile(Icons.lock_reset, 'Change Password', null, _changePasswordDialog),
           _tile(Icons.email_outlined, 'Change Email', 'Requires main admin approval', _requestEmailChangeDialog),
-          SwitchListTile(
-            secondary: const Icon(Icons.fingerprint, color: AppColors.hint),
-            title: const Text('Biometric Lock', style: TextStyle(color: Colors.white)),
-            value: _biometricLock,
-            onChanged: _toggleBiometric,
-          ),
           _tile(Icons.history, 'Activity Log', 'View your login history', () {
             Navigator.push(context, MaterialPageRoute(builder: (_) => const ActivityLogScreen()));
           }),
 
           const SizedBox(height: 20),
           const Text('Preferences', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13)),
-          SwitchListTile(
-            secondary: const Icon(Icons.notifications_outlined, color: AppColors.hint),
-            title: const Text('New Verification Alerts', style: TextStyle(color: Colors.white)),
-            value: _notifyVerifications,
-            onChanged: _toggleNotify,
-          ),
           _tile(Icons.system_update_outlined, 'Check for Update', null, _checkForUpdate),
 
           const SizedBox(height: 20),
