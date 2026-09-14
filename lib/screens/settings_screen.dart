@@ -148,7 +148,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
     try {
-      final result = await ApiService.checkForUpdate('1.0.2');
+      final result = await ApiService.checkForUpdate('1.0.3');
       if (!mounted) return;
       Navigator.pop(context);
       if (result['updateAvailable'] == true) {
