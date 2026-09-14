@@ -18,6 +18,7 @@ class AppColors {
 }
 
 final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 const AndroidNotificationChannel _channel = AndroidNotificationChannel(
   'mygame_notifications',
@@ -76,6 +77,7 @@ class SubAdminApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'MYGame Sub-Admin',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

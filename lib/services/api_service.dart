@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'device_service.dart';
+import '../main.dart';
+import '../screens/pending_approval_screen.dart';
 
 class ApiService {
   static const String baseUrl = 'https://api.finbassshamar.online';
@@ -30,12 +33,32 @@ class ApiService {
     return headers;
   }
 
+  static bool _forcingLogout = false;
+
+  static Future<void> _forceSessionInvalidated() async {
+    if (_forcingLogout) return;
+    _forcingLogout = true;
+    await clearToken();
+    final nav = navigatorKey.currentState;
+    if (nav != null) {
+      nav.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const PendingApprovalScreen()),
+        (route) => false,
+      );
+    }
+    _forcingLogout = false;
+  }
+
   static Future<dynamic> _handle(http.Response res) async {
     final body = jsonDecode(utf8.decode(res.bodyBytes));
     if (res.statusCode >= 200 && res.statusCode < 300) {
       return body;
     } else {
       final errorMsg = body is Map ? (body['error'] ?? 'Request failed (${res.statusCode})') : 'Request failed (${res.statusCode})';
+      if (errorMsg.toString().startsWith('SESSION_INVALIDATED:')) {
+        _forceSessionInvalidated();
+        throw Exception(errorMsg.toString().replaceFirst('SESSION_INVALIDATED:', ''));
+      }
       throw Exception(errorMsg);
     }
   }
