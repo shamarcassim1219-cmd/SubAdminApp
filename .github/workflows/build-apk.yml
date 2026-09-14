@@ -30,10 +30,18 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate app icon
+        run: dart run flutter_launcher_icons
+
       - name: Fix applicationId
         run: |
           sed -i 's/applicationId = "com.mygame.subadmin.mygame_subadmin_app"/applicationId = "com.mygame.subadmin"/' android/app/build.gradle
           sed -i 's/applicationId "com.mygame.subadmin.mygame_subadmin_app"/applicationId "com.mygame.subadmin"/' android/app/build.gradle
+
+      - name: Set app display name
+        run: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          sed -i 's/android:label="[^"]*"/android:label="Sub Admin"/' "$MANIFEST"
 
       - name: Bump minSdkVersion to 23
         run: sed -i 's/flutter.minSdkVersion/23/' android/app/build.gradle
