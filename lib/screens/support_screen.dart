@@ -11,13 +11,36 @@ class SupportScreen extends StatefulWidget {
 
 class _SupportScreenState extends State<SupportScreen> {
   List<dynamic> _items = [];
+  List<dynamic> _filtered = [];
   bool _loading = true;
   String? _error;
+  final _searchCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _load();
+    _searchCtrl.addListener(_applyFilter);
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _applyFilter() {
+    final q = _searchCtrl.text.trim().toLowerCase();
+    setState(() {
+      _filtered = q.isEmpty
+          ? _items
+          : _items.where((r) {
+              final email = (r['userEmail'] ?? '').toString().toLowerCase();
+              final subject = (r['subject'] ?? '').toString().toLowerCase();
+              final userId = (r['userId'] ?? '').toString();
+              return email.contains(q) || subject.contains(q) || userId == q;
+            }).toList();
+    });
   }
 
   Future<void> _load() async {
@@ -30,6 +53,7 @@ class _SupportScreenState extends State<SupportScreen> {
       if (!mounted) return;
       setState(() {
         _items = items;
+        _filtered = items;
         _loading = false;
       });
     } catch (e) {
@@ -46,20 +70,34 @@ class _SupportScreenState extends State<SupportScreen> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(title: const Text('Support')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-          : _error != null
-              ? Center(child: Text(_error!, style: const TextStyle(color: Colors.redAccent)))
-              : _items.isEmpty
-                  ? const Center(child: Text('No open support requests', style: TextStyle(color: AppColors.hint)))
-                  : RefreshIndicator(
-                      onRefresh: _load,
-                      color: AppColors.primary,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(12),
-                        itemCount: _items.length,
-                        itemBuilder: (context, i) {
-                          final r = _items[i];
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+            child: TextField(
+              controller: _searchCtrl,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                hintText: 'Search by ID, mobile, or email',
+                prefixIcon: Icon(Icons.search, color: AppColors.hint),
+              ),
+            ),
+          ),
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                : _error != null
+                    ? Center(child: Text(_error!, style: const TextStyle(color: Colors.redAccent)))
+                    : _filtered.isEmpty
+                        ? const Center(child: Text('No open support requests', style: TextStyle(color: AppColors.hint)))
+                        : RefreshIndicator(
+                            onRefresh: _load,
+                            color: AppColors.primary,
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(12),
+                              itemCount: _filtered.length,
+                              itemBuilder: (context, i) {
+                                final r = _filtered[i];
                           return Container(
                             margin: const EdgeInsets.only(bottom: 10),
                             decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
@@ -86,9 +124,12 @@ class _SupportScreenState extends State<SupportScreen> {
                               },
                             ),
                           );
-                        },
-                      ),
-                    ),
+                              },
+                            ),
+                          ),
+          ),
+        ],
+      ),
     );
   }
 }

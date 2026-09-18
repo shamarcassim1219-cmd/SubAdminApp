@@ -252,6 +252,35 @@ class ApiService {
     await _handle(res);
   }
 
+  // ---------- ORDERS ----------
+  static Future<List<dynamic>> getOrders({String? search}) async {
+    final uri = Uri.parse('$baseUrl/subadmin/orders').replace(
+      queryParameters: (search != null && search.trim().isNotEmpty) ? {'search': search.trim()} : null,
+    );
+    final res = await http.get(uri, headers: await _headers());
+    final data = await _handle(res);
+    return data['orders'];
+  }
+
+  // ---------- DISPUTES ----------
+  static Future<List<dynamic>> getDisputes({String? search}) async {
+    final uri = Uri.parse('$baseUrl/subadmin/disputes').replace(
+      queryParameters: (search != null && search.trim().isNotEmpty) ? {'search': search.trim()} : null,
+    );
+    final res = await http.get(uri, headers: await _headers());
+    final data = await _handle(res);
+    return data['disputes'];
+  }
+
+  static Future<void> resolveDispute(int id, String resolution) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/subadmin/disputes/$id/resolve'),
+      headers: await _headers(),
+      body: jsonEncode({'resolution': resolution}),
+    );
+    await _handle(res);
+  }
+
   // ---------- APP UPDATE CHECK ----------
   static Future<Map<String, dynamic>> checkForUpdate(String currentVersion) async {
     try {
